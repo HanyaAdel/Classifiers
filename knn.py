@@ -19,7 +19,7 @@ def get_neighbors(train, test_row, k, distance_metric):
             distances.append((train_row, dist))
     else:
         for train_row in train:
-            dist = util.manhattan_distance(test_row, train_row)
+            dist = util.manhattanDistance(test_row, train_row)
             distances.append((train_row, dist))
     distances.sort(key=lambda tup: tup[1])
     neighbors = list()

@@ -1,3 +1,4 @@
+from knn import KnnClassifier
 import samples
 import util
 DIGIT_DATUM_WIDTH = 28
@@ -68,20 +69,20 @@ def runClassifier():
     rawFaceTestingData = samples.loadDataFile("facedata/facedatatest", TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT)
     rawFaceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
 
-    print("digits test" , len(rawDigitTestingData))
-    print(len(digitTestingLabels))
-    print(len(rawDigitTrainingData))
-    print(len(digitTrainingLabels))
-    print(len(rawDigitValidationData))
-    print(len(digitValidationLabels))
+    # print("digits test" , len(rawDigitTestingData))
+    # print(len(digitTestingLabels))
+    # print(len(rawDigitTrainingData))
+    # print(len(digitTrainingLabels))
+    # print(len(rawDigitValidationData))
+    # print(len(digitValidationLabels))
 
-    print ("-----------------------------")
-    print(len(rawFaceTestingData))
-    print(len(rawFaceTestingLabels))
-    print(len(rawFaceTrainingData))
-    print(len(faceTrainingLabels))
-    print(len(rawFaceValidationData))
-    print(len(rawFaceValidationLabels))
+    # print ("-----------------------------")
+    # print(len(rawFaceTestingData))
+    # print(len(rawFaceTestingLabels))
+    # print(len(rawFaceTrainingData))
+    # print(len(faceTrainingLabels))
+    # print(len(rawFaceValidationData))
+    # print(len(rawFaceValidationLabels))
 
     digitTrainingData = []
     digitTestingData = []
@@ -111,6 +112,18 @@ def runClassifier():
 
     digitLegalLabels = range(10)
     faceLegalLabels = range(2)
+
+    # classifier = KnnClassifier(digitLegalLabels,3, 0)
+    # classifier.train(digitTrainingData, digitTrainingLabels, digitValidationData, digitValidationLabels)
+    # guesses = classifier.classify(digitValidationData)
+    # correct = [guesses[i] == digitValidationLabels[i] for i in range(len(digitValidationLabels))].count(True)
+    # print (str(correct), ("correct out of " + str(len(digitValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(digitValidationLabels)))
+    
+    classifier = KnnClassifier(digitLegalLabels,3, 1)
+    classifier.train(digitTrainingData, digitTrainingLabels, digitValidationData, digitValidationLabels)
+    guesses = classifier.classify(digitValidationData)
+    correct = [guesses[i] == digitValidationLabels[i] for i in range(len(digitValidationLabels))].count(True)
+    print (str(correct), ("correct out of " + str(len(digitValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(digitValidationLabels)))
 
 if __name__ == '__main__':
     runClassifier()
