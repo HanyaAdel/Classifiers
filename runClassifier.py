@@ -68,6 +68,20 @@ def runClassifier():
     rawFaceTestingData = samples.loadDataFile("facedata/facedatatest", TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT)
     rawFaceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
 
+    print("digits test" , len(rawDigitTestingData))
+    print(len(digitTestingLabels))
+    print(len(rawDigitTrainingData))
+    print(len(digitTrainingLabels))
+    print(len(rawDigitValidationData))
+    print(len(digitValidationLabels))
+
+    print ("-----------------------------")
+    print(len(rawFaceTestingData))
+    print(len(rawFaceTestingLabels))
+    print(len(rawFaceTrainingData))
+    print(len(faceTrainingLabels))
+    print(len(rawFaceValidationData))
+    print(len(rawFaceValidationLabels))
 
     digitTrainingData = []
     digitTestingData = []
@@ -95,7 +109,8 @@ def runClassifier():
     for datum in rawFaceValidationData:
         faceValidationData.append(basicFeatureExtractorFace(datum = datum))                
 
-    #print(faceTrainingData)
+    digitLegalLabels = range(10)
+    faceLegalLabels = range(2)
 
 if __name__ == '__main__':
     runClassifier()
