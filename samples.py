@@ -101,8 +101,8 @@ def loadDataFile(filename, n,width,height):
   DATUM_WIDTH=width
   DATUM_HEIGHT=height
   fin = readlines(filename)
-  fin.reverse()
   #print(len(fin))
+  fin.reverse()
   items = []
   for i in range(n):
     data = []
@@ -110,7 +110,7 @@ def loadDataFile(filename, n,width,height):
       data.append(list(fin.pop()))
     if len(data[0]) < DATUM_WIDTH-1:
       # we encountered end of file...
-      print ("Truncating at %d examples (maximum)" % i)
+      print("Truncating at %d examples (maximum)" % i)
       break
     items.append(Datum(data,DATUM_WIDTH,DATUM_HEIGHT))
   return items
@@ -123,14 +123,15 @@ def readlines(filename):
     return [l[:-1] for l in open(filename).readlines()]
   else: 
     z = zipfile.ZipFile('data.zip')
-    
-    return z.read(filename).decode('utf8').split('\n')
+    liste= z.read(filename).decode("utf-8").split("\n")
+    return liste
     
 def loadLabelsFile(filename, n):
   """
   Reads n labels from a file and returns a list of integers.
   """
   fin = readlines(filename)
+  #print(len(fin))
   labels = []
   for line in fin[:min(n, len(fin))]:
     if line == '':
@@ -164,10 +165,11 @@ def convertToInteger(data):
   """
   Helper function for file reading.
   """
-  if type(data) != type([]):
+  #print("cvtToInt",data)
+  if type(data) !=type([]) :
     return IntegerConversionFunction(data)
   else:
-    return map(convertToInteger, data)
+    return list(map(convertToInteger, data))
 
 # Testing
 
@@ -175,21 +177,17 @@ def _test():
   import doctest
   doctest.testmod() # Test the interactive sessions in function comments
   n = 1
-  # items = loadDataFile("facedata/facedatatrain", n,60,70)
-  # items = loadDataFile("facedata/facedatatest", n,60,70)
-  # items = loadDataFile("facedata/facedatavalidation", n,60,70)
-  # labels = loadLabelsFile("facedata/facedatatrainlabels", n)
-  items = loadDataFile("digitdata/validationimages", n,28,28)
-  items = loadDataFile("digitdata/testimages", n,28,28)
+#  items = loadDataFile("facedata/facedatatrain", n,60,70)
+#  labels = loadLabelsFile("facedata/facedatatrainlabels", n)
   items = loadDataFile("digitdata/trainingimages", n,28,28)
-  labels = loadLabelsFile("digitdata/validationlabels", n)
-  # for i in range(1):
-  #   print (items[i])
-  #   print (items[i])
-  #   print (items[i].height)
-  #   print (items[i].width)
-  #   print (dir(items[i]))
-  #   print (items[i].getPixels())
+  labels = loadLabelsFile("digitdata/traininglabels", n)
+  for i in range(1):
+    print (items[i])
+    print (items[i])
+    print (items[i].height)
+    print (items[i].width)
+    print (dir(items[i]))
+    print (items[i].pixels)
 
 if __name__ == "__main__":
   _test()  

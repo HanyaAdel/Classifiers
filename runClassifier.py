@@ -21,7 +21,7 @@ def basicFeatureExtractorDigit(datum):
     Returns a set of pixel features indicating whether
     each pixel in the provided datum is white (0) or gray/black (1)
     """
-    a = datum.getPixels()
+
     features = util.Counter()
     for x in range(DIGIT_DATUM_WIDTH):
         for y in range(DIGIT_DATUM_HEIGHT):
@@ -37,8 +37,6 @@ def basicFeatureExtractorFace(datum):
   Returns a set of pixel features indicating whether
   each pixel in the provided datum is an edge (1) or no edge (0)
   """
-  a = datum.getPixels()
-
   features = util.Counter()
   for x in range(FACE_DATUM_WIDTH):
     for y in range(FACE_DATUM_HEIGHT):
@@ -51,7 +49,7 @@ def basicFeatureExtractorFace(datum):
 def runClassifier():
 
     rawDigitTrainingData = samples.loadDataFile("digitdata/trainingimages", TRAINING_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH,
-                                               DIGIT_DATUM_HEIGHT)
+                                                DIGIT_DATUM_HEIGHT)
     digitTrainingLabels = samples.loadLabelsFile("digitdata/traininglabels", TRAINING_DATA_SIZE_DIGITS)
     rawDigitValidationData = samples.loadDataFile("digitdata/validationimages", VALIDATION_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH,
                                                  DIGIT_DATUM_HEIGHT)
@@ -70,20 +68,6 @@ def runClassifier():
     rawFaceTestingData = samples.loadDataFile("facedata/facedatatest", TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT)
     rawFaceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
 
-    print("digits test" , len(rawDigitTestingData))
-    print(len(digitTestingLabels))
-    print(len(rawDigitTrainingData))
-    print(len(digitTrainingLabels))
-    print(len(rawDigitValidationData))
-    print(len(digitValidationLabels))
-
-    print ("-----------------------------")
-    print(len(rawFaceTestingData))
-    print(len(rawFaceTestingLabels))
-    print(len(rawFaceTrainingData))
-    print(len(faceTrainingLabels))
-    print(len(rawFaceValidationData))
-    print(len(rawFaceValidationLabels))
 
     digitTrainingData = []
     digitTestingData = []
@@ -105,12 +89,13 @@ def runClassifier():
     faceValidationData = []
 
     for datum in rawFaceTrainingData:
-        faceTrainingData.append(basicFeatureExtractorDigit(datum = datum))
-    for datum in rawDigitTestingData:
-        faceTestingData.append(basicFeatureExtractorDigit(datum = datum))
+        faceTrainingData.append(basicFeatureExtractorFace(datum = datum))
+    for datum in rawFaceTestingData:
+        faceTestingData.append(basicFeatureExtractorFace(datum = datum))
     for datum in rawFaceValidationData:
-        faceValidationData.append(basicFeatureExtractorDigit(datum = datum))                
+        faceValidationData.append(basicFeatureExtractorFace(datum = datum))                
 
+    #print(faceTrainingData)
 
 if __name__ == '__main__':
     runClassifier()
