@@ -1,83 +1,100 @@
-import sys
-
-def readCommand(argv):
-    """Processes the command used to run from the command line."""
-    from optparse import OptionParser
-    parser = OptionParser(USAGE_STRING)
-
-    parser.add_option('-r', '--run',  help='automatically runs training and test cycle for 5 times',
-                      default= False, action='store_true')
-
-    parser.add_option('-c', '--classifier', help='The type of classifier',
-                      choices=['perceptron', 'naiveBayes', 'mira'],
-                      default='naiveBayes')
-    parser.add_option('-d', '--data', help='Dataset to use', choices=['digits', 'faces'], default='digits')
-
-    options, otherjunk = parser.parse_args(argv)
-    if len(otherjunk) != 0:
-        raise Exception('Command line input not understood: ' + str(otherjunk))
-    args = {}
-
-    # Set up variables according to the command line input.
-    print("Doing classification")
-    print("--------------------")
-    print("data:\t\t" + options.data)
-    print("classifier:\t\t" + options.classifier)
-
-    if options.data == "digits":
-        featureFunction = basicFeatureExtractorDigit
-    elif options.data == "faces":
-        featureFunction = basicFeatureExtractorFace
-    else:
-        print("Unknown dataset", options.data)
-        print(USAGE_STRING)
-        sys.exit(2)
-
-    if options.data == "digits":
-        legalLabels = range(10)
-    else:
-        legalLabels = range(2)
+import samples
+import util
+DIGIT_DATUM_WIDTH = 28
+DIGIT_DATUM_HEIGHT = 28
+FACE_DATUM_WIDTH = 60
+FACE_DATUM_HEIGHT = 70
 
 
-    if options.classifier == "naiveBayes":
-        classifier = naiveBayes.NaiveBayesClassifier(legalLabels)
-    elif options.classifier == "perceptron":
-        classifier = perceptron.PerceptronClassifier(legalLabels)
-    elif options.classifier == "knn":
-        classifier = knn.KNNClassifier(legalLabels)
-    elif options.classifier == "mlp":
-        classifier = mlp.MLPClassifier(legalLabels)     
-    elif options.classifier == "decisionTree":
-        classifier = decisionTree.Decision()                        
+TRAINING_DATA_SIZE_DIGITS = 5000
+TESTING_DATA_SIZE_DIGITS = 1000
+VALIDATION_DATA_SIZE_DIGITS = 1000
 
-    else:
-        print("Unknown classifier:", options.classifier)
-        print(USAGE_STRING)
-
-        sys.exit(2)
-
-    args['classifier'] = classifier
-    args['featureFunction'] = featureFunction
-    return args, options
+TRAINING_DATA_SIZE_FACES = 451
+TESTING_DATA_SIZE_FACES = 150
+VALIDATION_DATA_SIZE_FACES = 301
 
 
-USAGE_STRING = """
-  USAGE:      python dataClassifier.py <options>
-  EXAMPLES:   (1) python dataClassifier.py
-                  - trains the default mostFrequent classifier on the digit dataset
-                  using the default 100 training examples and
-                  then test the classifier on test data
-              (2) python dataClassifier.py -c naiveBayes -d digits -t 1000 -f -o -1 3 -2 6 -k 2.5
-                  - would run the naive Bayes classifier on 1000 training examples
-                  using the enhancedFeatureExtractorDigits function to get the features
-                  on the faces dataset, would use the smoothing parameter equals to 2.5, would
-                  test the classifier on the test data and performs an odd ratio analysis
-                  with label1=3 vs. label2=6
-                 """
+
+def basicFeatureExtractorDigit(datum):
+    """
+    Returns a set of pixel features indicating whether
+    each pixel in the provided datum is white (0) or gray/black (1)
+    """
+    a = datum.getPixels()
+    features = util.Counter()
+    for x in range(DIGIT_DATUM_WIDTH):
+        for y in range(DIGIT_DATUM_HEIGHT):
+            if datum.getPixel(x, y) > 0:
+                features[(x, y)] = 1
+            else:
+                features[(x, y)] = 0
+    return features
+
+
+def basicFeatureExtractorFace(datum):
+  """
+  Returns a set of pixel features indicating whether
+  each pixel in the provided datum is an edge (1) or no edge (0)
+  """
+  a = datum.getPixels()
+
+  features = util.Counter()
+  for x in range(FACE_DATUM_WIDTH):
+    for y in range(FACE_DATUM_HEIGHT):
+      if datum.getPixel(x, y) > 0:
+        features[(x,y)] = 1
+      else:
+        features[(x,y)] = 0
+  return features
+
+def runClassifier():
+
+    rawDigitTrainingData = samples.loadDataFile("digitdata/trainingimages", TRAINING_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH,
+                                               DIGIT_DATUM_HEIGHT)
+    digitTrainingLabels = samples.loadLabelsFile("digitdata/traininglabels", TRAINING_DATA_SIZE_DIGITS)
+    rawDigitValidationData = samples.loadDataFile("digitdata/validationimages", VALIDATION_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH,
+                                                 DIGIT_DATUM_HEIGHT)
+    digitValidationLabels = samples.loadLabelsFile("digitdata/validationlabels", VALIDATION_DATA_SIZE_DIGITS)
+    rawDigitTestingData = samples.loadDataFile("digitdata/testimages", TESTING_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT)
+    digitTestingLabels = samples.loadLabelsFile("digitdata/testlabels", TESTING_DATA_SIZE_DIGITS)
+
+
+
+    rawFaceTrainingData = samples.loadDataFile("facedata/facedatatrain", TRAINING_DATA_SIZE_FACES, FACE_DATUM_WIDTH,
+                                               FACE_DATUM_HEIGHT)
+    faceTrainingLabels = samples.loadLabelsFile("facedata/facedatatrainlabels", TRAINING_DATA_SIZE_FACES)
+    rawFaceValidationData = samples.loadDataFile("facedata/facedatavalidation", VALIDATION_DATA_SIZE_FACES, FACE_DATUM_WIDTH,
+                                                 FACE_DATUM_HEIGHT)
+    rawFaceValidationLabels = samples.loadLabelsFile("facedata/facedatavalidationlabels", VALIDATION_DATA_SIZE_FACES)
+    rawFaceTestingData = samples.loadDataFile("facedata/facedatatest", TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT)
+    rawFaceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
+
+    print("digits test" , len(rawDigitTestingData))
+    print(len(digitTestingLabels))
+    print(len(rawDigitTrainingData))
+    print(len(digitTrainingLabels))
+    print(len(rawDigitValidationData))
+    print(len(digitValidationLabels))
+
+    print ("-----------------------------")
+    print(len(rawFaceTestingData))
+    print(len(rawFaceTestingLabels))
+    print(len(rawFaceTrainingData))
+    print(len(faceTrainingLabels))
+    print(len(rawFaceValidationData))
+    print(len(rawFaceValidationLabels))
+
+    digitFeatureFunction = basicFeatureExtractorDigit
+    digitTrainingData = map(digitFeatureFunction, rawDigitTrainingData)
+    digitTestingData = map(digitFeatureFunction, rawDigitTestingData)
+    digitValidationData = map(digitFeatureFunction, rawDigitValidationData)
+
+    faceFeatureFunction = basicFeatureExtractorFace
+    faceTrainingData = map(faceFeatureFunction, rawFaceTrainingData)
+    faceTestingData = map(faceFeatureFunction, rawDigitTestingData)
+    faceValidationData = map(faceFeatureFunction, rawFaceValidationData)
 
 
 if __name__ == '__main__':
-    # Read input
-    args, options = readCommand( sys.argv[1:] ) 
-    # Run classifier
-    runClassifier(args, options)
+    runClassifier()

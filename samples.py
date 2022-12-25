@@ -102,7 +102,7 @@ def loadDataFile(filename, n,width,height):
   DATUM_HEIGHT=height
   fin = readlines(filename)
   fin.reverse()
-  print(len(fin))
+  #print(len(fin))
   items = []
   for i in range(n):
     data = []
@@ -120,10 +120,8 @@ import os
 def readlines(filename):
   "Opens a file or reads it from the zip archive data.zip"
   if(os.path.exists(filename)): 
-    print('HERE')
     return [l[:-1] for l in open(filename).readlines()]
   else: 
-    print("HERE2")
     z = zipfile.ZipFile('data.zip')
     
     return z.read(filename).decode('utf8').split('\n')
@@ -177,17 +175,21 @@ def _test():
   import doctest
   doctest.testmod() # Test the interactive sessions in function comments
   n = 1
-#  items = loadDataFile("facedata/facedatatrain", n,60,70)
-#  labels = loadLabelsFile("facedata/facedatatrainlabels", n)
+  # items = loadDataFile("facedata/facedatatrain", n,60,70)
+  # items = loadDataFile("facedata/facedatatest", n,60,70)
+  # items = loadDataFile("facedata/facedatavalidation", n,60,70)
+  # labels = loadLabelsFile("facedata/facedatatrainlabels", n)
+  items = loadDataFile("digitdata/validationimages", n,28,28)
+  items = loadDataFile("digitdata/testimages", n,28,28)
   items = loadDataFile("digitdata/trainingimages", n,28,28)
-  labels = loadLabelsFile("digitdata/traininglabels", n)
-  for i in range(1):
-    print (items[i])
-    print (items[i])
-    print (items[i].height)
-    print (items[i].width)
-    print (dir(items[i]))
-    print (items[i].getPixels())
+  labels = loadLabelsFile("digitdata/validationlabels", n)
+  # for i in range(1):
+  #   print (items[i])
+  #   print (items[i])
+  #   print (items[i].height)
+  #   print (items[i].width)
+  #   print (dir(items[i]))
+  #   print (items[i].getPixels())
 
 if __name__ == "__main__":
   _test()  
