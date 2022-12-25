@@ -85,15 +85,31 @@ def runClassifier():
     print(len(rawFaceValidationData))
     print(len(rawFaceValidationLabels))
 
-    digitFeatureFunction = basicFeatureExtractorDigit
-    digitTrainingData = map(digitFeatureFunction, rawDigitTrainingData)
-    digitTestingData = map(digitFeatureFunction, rawDigitTestingData)
-    digitValidationData = map(digitFeatureFunction, rawDigitValidationData)
+    digitTrainingData = []
+    digitTestingData = []
+    digitValidationData = []
 
-    faceFeatureFunction = basicFeatureExtractorFace
-    faceTrainingData = map(faceFeatureFunction, rawFaceTrainingData)
-    faceTestingData = map(faceFeatureFunction, rawDigitTestingData)
-    faceValidationData = map(faceFeatureFunction, rawFaceValidationData)
+
+    for datum in rawDigitTrainingData:
+        digitTrainingData.append(basicFeatureExtractorDigit(datum = datum))
+
+    for datum in rawDigitTestingData:
+        digitTestingData.append(basicFeatureExtractorDigit(datum = datum))
+
+    for datum in rawDigitValidationData:
+        digitValidationData.append(basicFeatureExtractorDigit(datum = datum))
+
+    
+    faceTrainingData = []
+    faceTestingData = []
+    faceValidationData = []
+
+    for datum in rawFaceTrainingData:
+        faceTrainingData.append(basicFeatureExtractorDigit(datum = datum))
+    for datum in rawDigitTestingData:
+        faceTestingData.append(basicFeatureExtractorDigit(datum = datum))
+    for datum in rawFaceValidationData:
+        faceValidationData.append(basicFeatureExtractorDigit(datum = datum))                
 
 
 if __name__ == '__main__':
