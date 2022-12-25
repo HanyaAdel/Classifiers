@@ -9,7 +9,7 @@
 import sys
 import inspect
 import heapq, random
-
+from math import sqrt
 
 """
  Data structures useful for implementing SearchAgents
@@ -93,7 +93,14 @@ class PriorityQueueWithFunction(PriorityQueue):
     "Adds an item to the queue with priority from the priority function"
     PriorityQueue.push(self, item, self.priorityFunction(item))
 
-    
+
+def euclidean_distance(row1, row2):
+	distance = 0.0
+	for i in range(len(row1)-1):
+		distance += (row1[i] - row2[i])**2
+	return sqrt(distance)
+
+
 def manhattanDistance( xy1, xy2 ):
   "Returns the Manhattan distance between points xy1 and xy2"
   return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
