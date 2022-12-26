@@ -7,7 +7,7 @@ FACE_DATUM_WIDTH = 60
 FACE_DATUM_HEIGHT = 70
 
 
-TRAINING_DATA_SIZE_DIGITS = 5000
+TRAINING_DATA_SIZE_DIGITS = 50
 TESTING_DATA_SIZE_DIGITS = 1000
 VALIDATION_DATA_SIZE_DIGITS = 1000
 
@@ -17,7 +17,7 @@ VALIDATION_DATA_SIZE_FACES = 301
 
 
 
-def basicFeatureExtractorDigit(datum):
+def digitFeatureExtractor(datum):
     """
     Returns a set of pixel features indicating whether
     each pixel in the provided datum is white (0) or gray/black (1)
@@ -33,7 +33,7 @@ def basicFeatureExtractorDigit(datum):
     return features
 
 
-def basicFeatureExtractorFace(datum):
+def faceFeatureExtractor(datum):
   """
   Returns a set of pixel features indicating whether
   each pixel in the provided datum is an edge (1) or no edge (0)
@@ -84,31 +84,15 @@ def runClassifier():
     # print(len(rawFaceValidationData))
     # print(len(rawFaceValidationLabels))
 
-    digitTrainingData = []
-    digitTestingData = []
-    digitValidationData = []
 
-
-    for datum in rawDigitTrainingData:
-        digitTrainingData.append(basicFeatureExtractorDigit(datum = datum))
-
-    for datum in rawDigitTestingData:
-        digitTestingData.append(basicFeatureExtractorDigit(datum = datum))
-
-    for datum in rawDigitValidationData:
-        digitValidationData.append(basicFeatureExtractorDigit(datum = datum))
+    digitTrainingData = list(map(digitFeatureExtractor, rawDigitTrainingData))
+    digitValidationData = list(map(digitFeatureExtractor, rawDigitValidationData))
+    digitTestingData = list(map(digitFeatureExtractor, rawDigitTestingData))
 
     
-    faceTrainingData = []
-    faceTestingData = []
-    faceValidationData = []
-
-    for datum in rawFaceTrainingData:
-        faceTrainingData.append(basicFeatureExtractorFace(datum = datum))
-    for datum in rawFaceTestingData:
-        faceTestingData.append(basicFeatureExtractorFace(datum = datum))
-    for datum in rawFaceValidationData:
-        faceValidationData.append(basicFeatureExtractorFace(datum = datum))                
+    faceTrainingData = list(map(faceFeatureExtractor, rawFaceTrainingData))
+    faceTestingData = list(map(faceFeatureExtractor, rawFaceTestingData))
+    faceValidationData = list(map(faceFeatureExtractor, rawFaceValidationData))              
 
     digitLegalLabels = range(10)
     faceLegalLabels = range(2)
