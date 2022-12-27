@@ -3,8 +3,7 @@ import math
 
 
 class BayesClassifier:
-    def __init__(self, legalLabels):
-        self.legalLabels = legalLabels
+    def __init__(self):
         self.type = "naivebayes"
         self.alpha = 1    # this is the default laplacian smoothing parameter
         self.automaticTuning = False     #Flag to decide whether to choose alpha automatically 

@@ -2,6 +2,7 @@ from knn import KnnClassifier
 from bayes import BayesClassifier
 import samples
 import util
+import numpy as np
 from matplotlib import pyplot as plt
 DIGIT_DATUM_WIDTH = 28
 DIGIT_DATUM_HEIGHT = 28
@@ -9,11 +10,12 @@ FACE_DATUM_WIDTH = 60
 FACE_DATUM_HEIGHT = 70
 
 
-TRAINING_DATA_SIZE_DIGITS = 100
-TESTING_DATA_SIZE_DIGITS = 30
-VALIDATION_DATA_SIZE_DIGITS = 30
 
-TRAINING_DATA_SIZE_FACES = 451 
+TRAINING_DATA_SIZE_DIGITS = 5000
+TESTING_DATA_SIZE_DIGITS = 1000
+VALIDATION_DATA_SIZE_DIGITS = 1000
+
+TRAINING_DATA_SIZE_FACES = 451
 TESTING_DATA_SIZE_FACES = 150
 VALIDATION_DATA_SIZE_FACES = 301
 
@@ -67,115 +69,146 @@ def runClassifier():
     faceTrainingLabels = samples.loadLabelsFile("facedata/facedatatrainlabels", TRAINING_DATA_SIZE_FACES)
     rawFaceValidationData = samples.loadDataFile("facedata/facedatavalidation", VALIDATION_DATA_SIZE_FACES, FACE_DATUM_WIDTH,
                                                  FACE_DATUM_HEIGHT)
-    rawFaceValidationLabels = samples.loadLabelsFile("facedata/facedatavalidationlabels", VALIDATION_DATA_SIZE_FACES)
+    faceValidationLabels = samples.loadLabelsFile("facedata/facedatavalidationlabels", VALIDATION_DATA_SIZE_FACES)
     rawFaceTestingData = samples.loadDataFile("facedata/facedatatest", TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT)
-    rawFaceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
-
-    # print("digits test" , len(rawDigitTestingData))
-    # print(len(digitTestingLabels))
-    # print(len(rawDigitTrainingData))
-    # print(len(digitTrainingLabels))
-    # print(len(rawDigitValidationData))
-    # print(len(digitValidationLabels))
-
-    # print ("-----------------------------")
-    # print(len(rawFaceTestingData))
-    # print(len(rawFaceTestingLabels))
-    # print(len(rawFaceTrainingData))
-    # print(len(faceTrainingLabels))
-    # print(len(rawFaceValidationData))
-    # print(len(rawFaceValidationLabels))
+    faceTestingLabels = samples.loadLabelsFile("facedata/facedatatestlabels", TESTING_DATA_SIZE_FACES)    
 
 
-    digitTrainingData = list(map(digitFeatureExtractor, rawDigitTrainingData))
-    digitValidationData = list(map(digitFeatureExtractor, rawDigitValidationData))
-    digitTestingData = list(map(digitFeatureExtractor, rawDigitTestingData))
+    digitTrainingData = []
+    for i in range (len(rawDigitTrainingData)):
+      digitTrainingData.append(rawDigitTrainingData[i].getPixels())
 
+    digitTestingData = []
+    for i in range (len(rawDigitTestingData)):
+      digitTestingData.append(rawDigitTestingData[i].getPixels())    
+
+    digitValidationData = []
+    for i in range (len(rawDigitValidationData)):
+      digitValidationData.append(rawDigitValidationData[i].getPixels())            
+
+
+    digitTrainingData = np.array(digitTrainingData).reshape(
+      TRAINING_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH * DIGIT_DATUM_HEIGHT)
+    digitTrainingLabels = np.array(digitTrainingLabels)
+
+    digitTestingData = np.array(digitTestingData).reshape(
+      TESTING_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH * DIGIT_DATUM_HEIGHT)    
+    digitValidationData = np.array(digitValidationData).reshape(
+      VALIDATION_DATA_SIZE_DIGITS, DIGIT_DATUM_WIDTH * DIGIT_DATUM_HEIGHT)    
+
+
+    faceTrainingData = []
+    for i in range (len(rawFaceTrainingData)):
+      faceTrainingData.append(rawFaceTrainingData[i].getPixels())
     
-    faceTrainingData = list(map(faceFeatureExtractor, rawFaceTrainingData))
-    faceTestingData = list(map(faceFeatureExtractor, rawFaceTestingData))
-    faceValidationData = list(map(faceFeatureExtractor, rawFaceValidationData))              
+    faceValidationData = []
+    for i in range (len(rawFaceValidationData)):
+      faceValidationData.append(rawFaceValidationData[i].getPixels())
 
-    digitLegalLabels = range(10)
-    faceLegalLabels = range(2)
+    faceTestingData = []
+    for i in range (len(rawFaceTestingData)):
+      faceTestingData.append(rawFaceTestingData[i].getPixels())
+
+    faceTrainingData = np.array(faceTrainingData).reshape(
+      TRAINING_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT)      
+    faceValidationData = np.array(faceValidationData).reshape(
+      VALIDATION_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT)            
+    faceTestingData = np.array(faceTestingData).reshape(
+      TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT)     
+
 
 
     runKNN(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
-    legalLabels=digitLegalLabels, trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+    trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
     testingLabels=digitTestingLabels)
-
-    # classifier = BayesClassifier(faceLegalLabels)
-    # classifier.train(faceTrainingData, faceTrainingLabels, faceValidationData, rawFaceValidationLabels)
-    # guesses = classifier.classify(faceValidationData)
-    # correct = [guesses[i] == rawFaceValidationLabels[i] for i in range(len(rawFaceValidationLabels))].count(True)
-    # print (str(correct), ("correct out of " + str(len(rawFaceValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(rawFaceValidationLabels)))
     
-    # classifier = BayesClassifier(digitLegalLabels)
-    # classifier.train(digitTrainingData, digitTrainingLabels, digitValidationData, digitValidationLabels)
-    # guesses = classifier.classify(digitValidationData)
-    # correct = [guesses[i] == digitValidationLabels[i] for i in range(len(digitValidationLabels))].count(True)
-    # print (str(correct), ("correct out of " + str(len(digitValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(digitValidationLabels)))
+    # runKNN(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
+    trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+    # testingLabels=faceTestingLabels)    
+
+    # runBayes(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
+    trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+    # testingLabels=digitTestingLabels)
+
+    # runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
+    trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+    # testingLabels=faceTestingLabels)    
 
 
 
-def runKNN(trainingData, validationData, testingData, legalLabels, 
+def runBayes(trainingData, validationData, testingData, 
 trainingLabels, validationLabels, testingLabels):
 
-    plot1 = plt.subplot2grid((5, 5), (0,0))
-    plot2 = plt.subplot2grid((5, 5), (0,2))
-    Kstats  = []
-    for k in range(2, 7):
-        classifier = KnnClassifier(legalLabels,k, 0)
-        classifier.train(trainingData, trainingLabels, validationData, validationLabels)
-        print ("Validating...")
-        guesses = classifier.classify(validationData)
-        correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-        print("using a k of ", k, " and distance mentric ", 0)
-        print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
-        print ("Testing...")
-        guesses = classifier.classify(testingData)
-        correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-        print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
-        accuracy = 100.0 * correct / len(testingLabels)
-        Kstats.append((k,round(accuracy, 2)))
-    print(Kstats)
-    xs = [x[0] for x in Kstats]
-    ys = [x[1] for x in Kstats]
-    plot1.plot(xs, ys)
-    plot1.set_title("Accuracy change with the change of the number of neighbors")
-    plot1.set_xlabel("number of neighbors (k)")
-    plot1.set_ylabel("Accuracy")
+  classifier = BayesClassifier()
 
-    distanceMetricStats = {"Euclidean" : 0, "Manhattan" : 0}
-    classifier = KnnClassifier(legalLabels,4, 0)
+  print("Training....")
+  classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+
+  print("Validating....")
+  guesses = classifier.classify(validationData)
+  correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+  print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
+  
+  print("Testing....")
+  guesses = classifier.classify(testingData)
+  correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
+  print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
+        
+
+
+def runKNN(trainingData, validationData, testingData, 
+trainingLabels, validationLabels, testingLabels):
+  figure, axis = plt.subplots(1, 2)
+  Kstats  = []
+  for k in range(2, 21):
+    print("K = ", k)
+
+    classifier = KnnClassifier(k, 1)
+
+    print ("Training...")
     classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+
+    print ("Validating...")
     guesses = classifier.classify(validationData)
-    #correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+    correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+    print("using a k of ", k, " and distance mentric ", 0)
+    print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
+    
     print ("Testing...")
     guesses = classifier.classify(testingData)
     correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
     print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
     accuracy = 100.0 * correct / len(testingLabels)
-    distanceMetricStats["Euclidean"] = round(accuracy, 3)
+    Kstats.append((k,round(accuracy, 2)))
+  print(Kstats)
+  xs = [x[0] for x in Kstats]
+  ys = [x[1] for x in Kstats]
+  axis[0].plot(xs, ys)
+  axis[0].set_title("Accuracy change with the change of the number of neighbors")
+  axis[0].set_xlabel("number of neighbors (k)")
+  axis[0].set_ylabel("Accuracy")
 
-    classifier = KnnClassifier(legalLabels,4, 1)
-    classifier.train(trainingData, trainingLabels, validationData, validationLabels)
-    guesses = classifier.classify(validationData)
-    #correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-    print ("Testing...")
-    guesses = classifier.classify(testingData)
-    correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-    print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
-    accuracy = 100.0 * correct / len(testingLabels)
-    distanceMetricStats["Manhattan"] = round(accuracy, 3)    
-    plot2.bar(list(distanceMetricStats.keys()), list(distanceMetricStats.values()))
+  distanceMetricStats = {0 : 0, 1: 0}
 
-    plot2.set_title("Accuracy of different distance metrics")
-    plot2.set_xlabel("Distance Metrics")
-    plot2.set_ylabel("Accuracy")
+  # for i in range (2):
+  #   classifier = KnnClassifier(legalLabels,4, 0)
+  #   classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+  #   #guesses = classifier.classify(validationData)
+  #   #correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+  #   print ("Testing...")
+  #   guesses = classifier.classify(testingData)
+  #   correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
+  #   print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
+  #   accuracy = 100.0 * correct / len(testingLabels)
+  #   distanceMetricStats[i] = round(accuracy, 3)
 
-    plt.title("KNN")
-    plt.tight_layout()
-    plt.show()
+
+  # axis[1].bar(["Euclidean", "Manhattan"], list(distanceMetricStats.values()))
+
+  # axis[1].set_title("Accuracy of different distance metrics")
+  # axis[1].set_xlabel("Distance Metrics")
+  # axis[1].set_ylabel("Accuracy")
+
+  plt.show()
 if __name__ == '__main__':
     runClassifier()
