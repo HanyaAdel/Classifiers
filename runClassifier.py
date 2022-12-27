@@ -4,10 +4,12 @@ import samples
 import util
 import numpy as np
 from matplotlib import pyplot as plt
+from sklearn.naive_bayes import GaussianNB
+
 DIGIT_DATUM_WIDTH = 28
 DIGIT_DATUM_HEIGHT = 28
 FACE_DATUM_WIDTH = 60
-FACE_DATUM_HEIGHT = 70
+FACE_DATUM_HEIGHT = 60
 
 
 
@@ -114,24 +116,37 @@ def runClassifier():
     faceValidationData = np.array(faceValidationData).reshape(
       VALIDATION_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT)            
     faceTestingData = np.array(faceTestingData).reshape(
-      TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT)     
+      TESTING_DATA_SIZE_FACES, FACE_DATUM_WIDTH * FACE_DATUM_HEIGHT) 
 
+    faceTrainingLabels = np.array(faceTrainingLabels)
+    faceValidationLabels = np.array(faceValidationLabels)
+    faceTestingLabels = np.array(faceTestingLabels)    
 
+    classifier = GaussianNB()
+    classifier.fit(faceTrainingData, faceTrainingLabels)
 
-    runKNN(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
-    trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
-    testingLabels=digitTestingLabels)
+    guesses = []
+    for datum in faceTestingData:
+      guesses.append(classifier.predict([datum]))
+    
+    correct = [guesses[i] == faceTestingLabels[i] for i in range(len(faceTestingLabels))].count(True)
+    print (str(correct), ("correct out of " + str(len(faceTestingLabels)) + " (%.1f%%).") % (100.0 * correct / len(faceTestingLabels)))
+  
+
+    # runKNN(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
+    # trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+    # testingLabels=digitTestingLabels)
     
     # runKNN(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-    trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+    # trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
     # testingLabels=faceTestingLabels)    
 
     # runBayes(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
-    trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+    # trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
     # testingLabels=digitTestingLabels)
 
     # runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-    trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+    # trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
     # testingLabels=faceTestingLabels)    
 
 
@@ -160,7 +175,7 @@ def runKNN(trainingData, validationData, testingData,
 trainingLabels, validationLabels, testingLabels):
   figure, axis = plt.subplots(1, 2)
   Kstats  = []
-  for k in range(2, 21):
+  for k in range(2, 41):
     print("K = ", k)
 
     classifier = KnnClassifier(k, 1)
@@ -171,7 +186,7 @@ trainingLabels, validationLabels, testingLabels):
     print ("Validating...")
     guesses = classifier.classify(validationData)
     correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-    print("using a k of ", k, " and distance mentric ", 0)
+    print("using a k of ", k, " and distance metric Euclidean")
     print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
     
     print ("Testing...")
@@ -188,27 +203,29 @@ trainingLabels, validationLabels, testingLabels):
   axis[0].set_xlabel("number of neighbors (k)")
   axis[0].set_ylabel("Accuracy")
 
-  distanceMetricStats = {0 : 0, 1: 0}
+  distanceMetricStats = {1 : 0, 2: 0}
 
-  # for i in range (2):
-  #   classifier = KnnClassifier(legalLabels,4, 0)
-  #   classifier.train(trainingData, trainingLabels, validationData, validationLabels)
-  #   #guesses = classifier.classify(validationData)
-  #   #correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-  #   print ("Testing...")
-  #   guesses = classifier.classify(testingData)
-  #   correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-  #   print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
-  #   accuracy = 100.0 * correct / len(testingLabels)
-  #   distanceMetricStats[i] = round(accuracy, 3)
+  for i in range (1,3):
+    classifier = KnnClassifier(4, i)
+    classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+    guesses = classifier.classify(validationData)
+    correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+    print ("Testing...")
+    guesses = classifier.classify(testingData)
+    correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
+    print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
+    accuracy = 100.0 * correct / len(testingLabels)
+    distanceMetricStats[i] = round(accuracy, 3)
 
 
-  # axis[1].bar(["Euclidean", "Manhattan"], list(distanceMetricStats.values()))
+  axis[1].bar(["Euclidean", "Manhattan"], list(distanceMetricStats.values()))
 
-  # axis[1].set_title("Accuracy of different distance metrics")
-  # axis[1].set_xlabel("Distance Metrics")
-  # axis[1].set_ylabel("Accuracy")
+  axis[1].set_title("Accuracy of different distance metrics")
+  axis[1].set_xlabel("Distance Metrics")
+  axis[1].set_ylabel("Accuracy")
 
   plt.show()
+
+
 if __name__ == '__main__':
     runClassifier()
