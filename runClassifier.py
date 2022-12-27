@@ -4,7 +4,6 @@ import samples
 import util
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.naive_bayes import GaussianNB
 
 DIGIT_DATUM_WIDTH = 28
 DIGIT_DATUM_HEIGHT = 28
@@ -122,16 +121,6 @@ def runClassifier():
     faceValidationLabels = np.array(faceValidationLabels)
     faceTestingLabels = np.array(faceTestingLabels)    
 
-    classifier = GaussianNB()
-    classifier.fit(faceTrainingData, faceTrainingLabels)
-
-    guesses = []
-    for datum in faceTestingData:
-      guesses.append(classifier.predict([datum]))
-    
-    correct = [guesses[i] == faceTestingLabels[i] for i in range(len(faceTestingLabels))].count(True)
-    print (str(correct), ("correct out of " + str(len(faceTestingLabels)) + " (%.1f%%).") % (100.0 * correct / len(faceTestingLabels)))
-  
 
     # runKNN(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
     # trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
@@ -145,30 +134,45 @@ def runClassifier():
     # trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
     # testingLabels=digitTestingLabels)
 
-    # runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-    # trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
-    # testingLabels=faceTestingLabels)    
+    runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
+    trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+    testingLabels=faceTestingLabels)    
 
 
 
 def runBayes(trainingData, validationData, testingData, 
 trainingLabels, validationLabels, testingLabels):
+  alpha_set = [0.0001, 0.001, 0.01, 0.1]
 
-  classifier = BayesClassifier()
+  alpha_stats = []
 
-  print("Training....")
-  classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+  for i in range(len(alpha_set)):
+    classifier = BayesClassifier(alpha_set[i])
+    print("variance smoothing value: ", alpha_set[i])
 
-  print("Validating....")
-  guesses = classifier.classify(validationData)
-  correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-  print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
-  
-  print("Testing....")
-  guesses = classifier.classify(testingData)
-  correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-  print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
-        
+    print("Training....")
+    classifier.train(trainingData, trainingLabels)
+
+    print("Validating....")
+    guesses = classifier.classify(validationData)
+    correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+    print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
+    
+    print("Testing....")
+    guesses = classifier.classify(testingData)
+    correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
+    print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))
+
+    accuracy = 100.0 * correct / len(testingLabels)
+    alpha_stats.append((alpha_set[i],round(accuracy, 2)))
+  xs = [x[0] for x in alpha_stats]
+  ys = [x[1] for x in alpha_stats]
+  plt.xticks(alpha_set)
+  plt.plot(xs, ys)
+  plt.title("Accuracy change with the change of variance smoothing")
+  plt.xlabel("variance smoothing value")
+  plt.ylabel("Accuracy")    
+  plt.show()
 
 
 def runKNN(trainingData, validationData, testingData, 
