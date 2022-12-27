@@ -3,23 +3,23 @@ import numpy as np
 
 
 # Make a classification prediction with neighbors
-def predict_classification(train, test_row, k, distance_metric):
-    neighbors = get_neighbors(train, test_row, k, distance_metric)
+def predict_classification(train, test, k, distance_metric):
+    neighbors = get_neighbors(train, test, k, distance_metric)
     output_values = [row[-1] for row in neighbors]
     prediction = max(set(output_values), key=output_values.count)
     return prediction
 
 
 # Locate the most similar neighbors
-def get_neighbors(train, test_row, k, distance_metric):
+def get_neighbors(train, test, k, distance_metric):
     distances = list()
     if distance_metric == 0:  # 0 is eucildean distance
         for train_row in train:
-            dist = util.euclidean_distance(test_row, train_row)
+            dist = util.euclidean_distance(test, train_row)
             distances.append((train_row, dist))
     else:
         for train_row in train:
-            dist = util.manhattanDistance(test_row, train_row)
+            dist = util.manhattanDistance(test, train_row)
             distances.append((train_row, dist))
     distances.sort(key=lambda tup: tup[1])
     neighbors = list()
@@ -66,12 +66,12 @@ class KnnClassifier:
             test_set.append(train_datum)
         self.test_set = test_set
 
-        guesses = []
+        test_predictions = []
 
         for test_datum in test_set:
             train_set = self.train_set
             k = self.k
             distance_metric=self.distance_metric
-            guess = predict_classification(train_set, test_datum, k, distance_metric)
-            guesses.append(guess)
-        return guesses
+            test_prediction = predict_classification(train_set, test_datum, k, distance_metric)
+            test_predictions.append(test_prediction)
+        return test_predictions

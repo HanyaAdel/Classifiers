@@ -1,5 +1,5 @@
 from knn import KnnClassifier
-from bayes import NaiveBayesClassifier
+from bayes import BayesClassifier
 import samples
 import util
 from matplotlib import pyplot as plt
@@ -9,9 +9,9 @@ FACE_DATUM_WIDTH = 60
 FACE_DATUM_HEIGHT = 70
 
 
-TRAINING_DATA_SIZE_DIGITS = 5000
-TESTING_DATA_SIZE_DIGITS = 1000
-VALIDATION_DATA_SIZE_DIGITS = 1000
+TRAINING_DATA_SIZE_DIGITS = 100
+TESTING_DATA_SIZE_DIGITS = 30
+VALIDATION_DATA_SIZE_DIGITS = 30
 
 TRAINING_DATA_SIZE_FACES = 451 
 TESTING_DATA_SIZE_FACES = 150
@@ -109,12 +109,12 @@ def runClassifier():
     # guesses = classifier.classify(faceValidationData)
     # correct = [guesses[i] == rawFaceValidationLabels[i] for i in range(len(rawFaceValidationLabels))].count(True)
     # print (str(correct), ("correct out of " + str(len(rawFaceValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(rawFaceValidationLabels)))
-
-    classifier = NaiveBayesClassifier(digitLegalLabels)
-    classifier.train(digitTrainingData, digitTrainingLabels, digitValidationData, digitValidationLabels)
-    guesses = classifier.classify(digitValidationData)
-    correct = [guesses[i] == digitValidationLabels[i] for i in range(len(digitValidationLabels))].count(True)
-    print (str(correct), ("correct out of " + str(len(digitValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(digitValidationLabels)))
+    
+    # classifier = BayesClassifier(digitLegalLabels)
+    # classifier.train(digitTrainingData, digitTrainingLabels, digitValidationData, digitValidationLabels)
+    # guesses = classifier.classify(digitValidationData)
+    # correct = [guesses[i] == digitValidationLabels[i] for i in range(len(digitValidationLabels))].count(True)
+    # print (str(correct), ("correct out of " + str(len(digitValidationLabels)) + " (%.1f%%).") % (100.0 * correct / len(digitValidationLabels)))
 
 
 

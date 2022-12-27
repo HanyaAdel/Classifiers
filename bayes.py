@@ -19,7 +19,7 @@ class BayesClassifier:
         self.features = list(set([ f for datum in trainingData for f in datum.keys() ]));
 
         if (self.automaticTuning):
-            alpha_vals = [0.001, 0.01, 0.05, 0.1, 0.5, 1, 5, 10, 20, 50]
+            alpha_vals = [0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
         else:
             alpha_vals = [self.alpha]
 
@@ -58,22 +58,6 @@ class BayesClassifier:
         prior.normalize()
         self.prior = prior
 
-        prior[0] = 0.9
-        prior[1] = 0.1
-        print(prior)
-        '''
-        prior[0] = 0.07
-        prior[1] = 0.02
-        prior[2] = 0.03
-        prior[3] = 0.08
-        prior[4] = 0.05
-        prior[5] = 0.04
-        prior[6] = 0.05
-        prior[7] = 0.06
-        prior[8] = 0.01
-        prior[9] = 0.09
-        '''
-
         # Using Laplace smoothing to tune the data and find the best alpha value that gives the highest accuracy
         bestAlpha = -1
         bestAccuracy = -1
@@ -103,11 +87,7 @@ class BayesClassifier:
             # Checking if any of the alpha values produced the best accuracy and if it did we store it
             if accuracy > bestAccuracy:
                 bestAlpha = alpha
-                bestAccuracy = accuracy
-        
-        print(bestAlpha)
-        print(bestAccuracy)
-        
+                bestAccuracy = accuracy       
 
         #Calculating the probabilities using the best alpha to get the most accurate results
         tProb = {}
@@ -143,6 +123,4 @@ class BayesClassifier:
                 p = self.probs[features][label][val];
                 logJoint[label] += math.log(p)
 
-        return logJoint
-
-       
+        return logJoint       
