@@ -2,7 +2,6 @@ import util
 import math
 from sklearn.svm import SVC
 
-
 class SVMClassifier:
     def __init__(self, c, gamma):
         self.type = "support vector machine"
