@@ -1,7 +1,6 @@
-import util
-import math
 from sklearn.naive_bayes import GaussianNB
 
+tuned_params = [[0.1], [0.0001]]
 
 class BayesClassifier:
     def __init__(self, v_smoothing):
@@ -19,3 +18,8 @@ class BayesClassifier:
         for datum in testData:
             guesses.append(self.classifier.predict([datum]))
         return guesses
+
+def classify_with_tuned_params(i, trainingData, trainingLabels, testingData):
+    classifier = BayesClassifier(tuned_params[i][0])
+    classifier.train(trainingData, trainingLabels)
+    return classifier.classify(testingData)

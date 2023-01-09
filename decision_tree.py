@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from sklearn import tree
 
-
+tuned_params = [["entropy", 13, 2, 4, 18], ["gini", 13, 9, 16, 6]]
 
 class DecisionTreeClassifier():
 
@@ -28,7 +28,17 @@ class DecisionTreeClassifier():
 		return guesses
 	
 	def plotTree(self):
-		plt.figure(figsize=(100,70),dpi = 100)
+		plt.figure(figsize=(60,20),dpi = 100)
 		tree.plot_tree(self.classifier, filled=True, fontsize=10)
 		plt.savefig('decision_tree.png')
 		plt.show()        
+
+
+def classify_with_tuned_params(i, trainingData, trainingLabels, testingData):
+	classifier = DecisionTreeClassifier(tuned_params[i][0], tuned_params[i][1], tuned_params[i][2]
+	, tuned_params[i][3], tuned_params[i][4])
+	
+	classifier.train(trainingData, trainingLabels)
+	classifier.plotTree()
+
+	return classifier.classify(testingData)

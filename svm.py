@@ -2,6 +2,8 @@ import util
 import math
 from sklearn.svm import SVC
 
+tuned_params = [[0.01, 100, "rbf"], [0.001, 1.0, "rbf"]]
+
 class SVMClassifier:
     def __init__(self, gamma = "scale", c = 1.0, kernel = "rbf"):
         self.type = "support vector machine"
@@ -17,3 +19,8 @@ class SVMClassifier:
         for datum in testData:
             guesses.append(self.classifier.predict([datum]))
         return guesses
+
+def classify_with_tuned_params(i, trainingData, trainingLabels, testingData):
+    classifier = SVMClassifier(tuned_params[i][0], tuned_params[i][1], tuned_params[i][2])
+    classifier.train(trainingData, trainingLabels)
+    return classifier.classify(testingData)
