@@ -20,7 +20,16 @@ pip install -U scikit-learn
 
 ## Running the code
 
-To run the code, open the runClassifier.py file and uncomment whichever function call you want to run at the end of the runClassifier function. Then run the following in your terminal
+To train and tume the models, open the runClassifier function in the runClassifier.py file and uncomment whichever function call you want to run at the end of the runClassifier function. Then run the following in your terminal
+
+``` 
+cd <PATH TO PROJECT DIRECTORY> 
+```
+```
+python runClassifier.py
+```
+
+To run the model with the previously tuned parameters, open the run_classifier_with_tuned_parameters function in the runClassifier.py file and uncomment whichever function call you want to run at the end of the runClassifier function. Then run the following in your terminal
 
 ``` 
 cd <PATH TO PROJECT DIRECTORY> 
