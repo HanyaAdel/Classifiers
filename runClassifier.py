@@ -103,17 +103,17 @@ def runClassifier(faceTrainingData, faceTrainingLabels,\
 	digitTrainingData, digitTrainingLabels, \
 	digitValidationData, digitValidationLabels, \
 	digitTestingData, digitTestingLabels):
-	#runMLP(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
-	#trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
-	#testingLabels=digitTestingLabels)
+	runMLP(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
+	trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+	testingLabels=digitTestingLabels)
 
 	# runSVM(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
 	# trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
 	# testingLabels=digitTestingLabels)
 
-	runSVM(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-	trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
-	testingLabels=faceTestingLabels)		
+	# runSVM(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
+	# trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
+	# testingLabels=faceTestingLabels)		
 
 	# runKNN(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
 	# trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
@@ -333,75 +333,79 @@ trainingLabels, validationLabels, testingLabels):
 	calcAccuracy(guesses=guesses, correctLabels=testingLabels)
 
 
-
-	# for i in range(len(c_values)):
-	# 	classifier = SVMClassifier(c_values[i], 0.01)
-
-	# 	print("C ", c_values[i])
-
-	# 	print("Training....")
-	# 	classifier.train(trainingData, trainingLabels)
-
-	# 	print("Validating....")
-	# 	guesses = classifier.classify(validationData)
-	# 	correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-	# 	print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
-		
-	# 	'''print("Testing....")
-	# 	guesses = classifier.classify(testingData)
-	# 	correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-	# 	print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))'''
-
-	# 	accuracy = 100.0 * (correct / len(validationLabels))
-	# 	c_stats.append((c_values[i],round(accuracy, 2)))
-	# xs = [x[0] for x in c_stats]
-	# ys = [x[1] for x in c_stats]
-	# plt.xticks(c_values)
-	# plt.plot(xs, ys)
-	# #plt.grid(True)
-	# plt.title("Accuracy change with the change of the C parameter, gamma = '10' ")
-	# plt.xlabel("C parameter")
-	# plt.ylabel("Accuracy")    
-	# plt.show()
-
-
 def runMLP(trainingData, validationData, testingData, 
 trainingLabels, validationLabels, testingLabels):
 
-	learning = [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5]
-	activation = ['identity', 'logistic', 'tanh', 'relu']
+	figure = plt.figure(constrained_layout=True)
+	plots = figure.add_gridspec(2, 3)
 
-	activation_stats = []
-	learning_stats = []
+	hyperparameters = [
+		{
+			"number" : 0,
+			"name": "activation function",
+			"dims": plots[0, :],
+			"x_label": "activation function",
+			"x_content" :['identity', 'logistic', 'tanh', 'relu'],
+			"plot_title": "Accuracy change with different activation functions",
+			"values": [
+				[i, 0.001] for i in ['identity', 'logistic', 'tanh', 'relu']
+			],
+			"stats" : []
+		},
+		{
+			"number" : 1,
+			"name": "learning rate init",
+			"dims": plots[1, :],
+			"x_label": "values for learning rate init",
+			"x_content" :[0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5],
+			"plot_title": "Accuracy change with different learning rate init",
+			"values": [
+				["relu", i] for i in [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5]
+			],
+			"stats" : []
+		},				
+	]
+	bestValues = [0,0]
+	for hyperparameter in hyperparameters:
+		print("Tuning the ",hyperparameter["name"], " hyperparameter")
+		maxAccuracy = 0
+		for value in hyperparameter["values"]:
+			classifier = MLP(value[0], value[1])
+			print("Training...")
+			classifier.train(trainingData=trainingData, trainingLabels=trainingLabels)
 
-	for i in range(len(learning)):
-		classifier = MLP( 'relu', learning[i])
+			print("Validating...")
+			guesses = classifier.classify(testData=validationData)
 
-		print("Learning Rate ", learning[i])
+			accuracy = calcAccuracy(guesses, validationLabels)
+			hyperparameter["stats"].append (round(accuracy, 1))
+			if (accuracy > maxAccuracy):
+				maxAccuracy = accuracy
+				bestValues[hyperparameter["number"]] = value[hyperparameter["number"]]
 
-		print("Training....")
-		classifier.train(trainingData, trainingLabels)
+		f = figure.add_subplot(hyperparameter["dims"])
 
-		print("Validating....")
-		guesses = classifier.classify(validationData)
-		correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-		print (str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels)))
-		
-		'''print("Testing....")
-		guesses = classifier.classify(testingData)
-		correct = [guesses[i] == testingLabels[i] for i in range(len(testingLabels))].count(True)
-		print (str(correct), ("correct out of " + str(len(testingLabels)) + " (%.1f%%).") % (100.0 * correct / len(testingLabels)))'''
+		x = hyperparameter["x_content"]
+		y = hyperparameter["stats"]
+		f.plot(x,y)
+		f.set_xticks(hyperparameter["x_content"])
+		f.set_yticks(list(range(0,100,50)))
+		for index in range(len(x)):
+			f.text(x[index], y[index], y[index], size=10)
 
-		accuracy = 100.0 * (correct / len(validationLabels))
-		learning_stats.append((learning[i],round(accuracy, 2)))
-	xs = [x[0] for x in learning_stats]
-	ys = [x[1] for x in learning_stats]
-	plt.plot(xs, ys)
-	plt.xticks(learning, labels=learning, rotation ='vertical')
-	plt.title("Accuracy change with the change of learning rate and activation = 'relu'")
-	plt.xlabel("Learning Rate")
-	plt.ylabel("Accuracy")    
+		f.set_title(hyperparameter["plot_title"])
+		f.set_xlabel(hyperparameter["x_label"])
+		f.set_ylabel("Accuracy")
 	plt.show()
+
+	print ("---------------------------------------")
+	print ("Best values for each hyperparameter: ")
+	print("activation function: ", bestValues[0])
+	print("learning rate init ", bestValues[1])
+
+	print("Testing...")
+	guesses = classifier.classify(testData=testingData)
+	calcAccuracy(guesses=guesses, correctLabels=testingLabels)
 
 
 def runBayes(trainingData, validationData, testingData, 
