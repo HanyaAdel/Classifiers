@@ -20,18 +20,14 @@ class DecisionTreeClassifier():
 
 
 	
-	def test(self, testData):
+	def classify(self, testData):
 		guesses = []
 		for datum in testData:
 			guesses.append(self.classifier.predict([datum]))
 
 		return guesses
 	
-	def plotTree(self, bestValues, trainingData, trainingLabels):
-		self.classifier = tree.DecisionTreeClassifier(criterion = bestValues[0], max_depth= bestValues[1], 
-		min_samples_split= bestValues[2], min_samples_leaf=bestValues[3], max_leaf_nodes=bestValues[4])
-
-		self.classifier.fit(trainingData, trainingLabels)
+	def plotTree(self):
 		plt.figure(figsize=(100,70),dpi = 100)
 		tree.plot_tree(self.classifier, filled=True, fontsize=10)
 		plt.savefig('decision_tree.png')

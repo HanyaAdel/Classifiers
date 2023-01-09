@@ -103,9 +103,11 @@ def runClassifier(faceTrainingData, faceTrainingLabels,\
 	digitTrainingData, digitTrainingLabels, \
 	digitValidationData, digitValidationLabels, \
 	digitTestingData, digitTestingLabels):
-	runMLP(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
-	trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
-	testingLabels=digitTestingLabels)
+
+	
+	# runMLP(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
+	# trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
+	# testingLabels=digitTestingLabels)
 
 	# runSVM(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
 	# trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
@@ -127,7 +129,7 @@ def runClassifier(faceTrainingData, faceTrainingLabels,\
 	# trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
 	# testingLabels=digitTestingLabels)
 
-	#runDecisionTree(faceTrainingData, faceValidationData, faceTestingData, faceTrainingLabels, faceValidationLabels, faceTestingLabels)
+	runDecisionTree(faceTrainingData, faceValidationData, faceTestingData, faceTrainingLabels, faceValidationLabels, faceTestingLabels)
 	# runDecisionTree(digitTrainingData, digitValidationData, digitTestingData, digitTrainingLabels, digitValidationLabels, digitTestingLabels)
 
 	# runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
@@ -213,7 +215,7 @@ trainingLabels, validationLabels, testingLabels):
 			classifier.train(trainingData=trainingData, trainingLabels=trainingLabels)
 
 			print("Validating...")
-			guesses = classifier.test(testData=validationData)
+			guesses = classifier.classify(testData=validationData)
 
 			accuracy = calcAccuracy(guesses, validationLabels)
 			hyperparameter["stats"].append (round(accuracy, 1))
@@ -231,7 +233,7 @@ trainingLabels, validationLabels, testingLabels):
 			y = hyperparameter["stats"]
 			f.plot(x,y)
 			f.set_xticks(hyperparameter["x_content"])
-			f.set_yticks(list(range(0,100,50)))
+			f.set_yticks(list(range(0,151,50)))
 			for index in range(len(x)):
 				f.text(x[index], y[index], y[index], size=10)
 
@@ -249,12 +251,17 @@ trainingLabels, validationLabels, testingLabels):
 	print("minimum samples in a leaf node", bestValues[3])
 	print("maximum number of leaf nodes: ", bestValues[4])
 	print ("---------------------------------------")
-	print ("Resulting Tree: ")
-	classifier.plotTree(bestValues=bestValues, trainingData = trainingData, trainingLabels = trainingLabels)
 
-	print("Testing...")
-	guesses = classifier.test(testData=testingData)
-	calcAccuracy(guesses=guesses, correctLabels=testingLabels)
+
+	print ("Resulting Tree: ")
+	bestClassifier = DecisionTreeClassifier(bestValues[0], bestValues[1], bestValues[2], bestValues[3], bestValues[4])
+	bestClassifier.train(trainingData, trainingLabels)
+	bestClassifier.plotTree()
+
+
+	print("Testing with the tuned hyperparameters...")
+	guesses = bestClassifier.classify(testData=testingData)
+	calcAccuracy(guesses=guesses, correctLabels=testingLabels)	
 
 				
 
@@ -262,40 +269,52 @@ def runSVM(trainingData, validationData, testingData,
 trainingLabels, validationLabels, testingLabels):
 	
 	figure = plt.figure(constrained_layout=True)
-	plots = figure.add_gridspec(2, 3)
+	plots = figure.add_gridspec(3, 1)
 
 	hyperparameters = [
 		{
 			"number" : 0,
 			"name": "gamma",
-			"dims": plots[0, :],
+			"dims": plots[0],
 			"x_label": "gamma values",
 			"x_content" :[0.0001, 0.001, 0.01, 0.1, 1, 10],
 			"plot_title": "Accuracy change with different gamma values",
 			"values": [
-				[i, 1.0] for i in [0.0001, 0.001, 0.01, 0.1, 1, 10]
+				[i, 1.0, "rbf"] for i in [0.0001, 0.001, 0.01, 0.1, 1, 10]
 			],
 			"stats" : []
 		},
 		{
 			"number" : 1,
 			"name": "c",
-			"dims": plots[1, :],
+			"dims": plots[1],
 			"x_label": "c values",
 			"x_content" :[0.01, 0.1, 1, 10, 100],
 			"plot_title": "Accuracy change with different c values",
 			"values": [
-				["scale", i] for i in [0.01, 0.1, 1, 10, 100]
+				["scale", i, "rbf"] for i in [0.01, 0.1, 1, 10, 100]
 			],
 			"stats" : []
-		},				
+		},
+		{
+			"number" : 2,
+			"name": "kernel",
+			"dims": plots[2],
+			"x_label": "kernels",
+			"x_content" :["linear", "poly", "rbf", "sigmoid"],
+			"plot_title": "Accuracy change with different kernels",
+			"values": [
+				["scale", 1.0, i] for i in ["linear", "poly", "rbf", "sigmoid"]
+			],
+			"stats" : []
+		},						
 	]
-	bestValues = [0,0]
+	bestValues = [0,0,""]
 	for hyperparameter in hyperparameters:
 		print("Tuning the ",hyperparameter["name"], " hyperparameter")
 		maxAccuracy = 0
 		for value in hyperparameter["values"]:
-			classifier = SVMClassifier(value[0], value[1])
+			classifier = SVMClassifier(value[0], value[1], value[2])
 			print("Training...")
 			classifier.train(trainingData=trainingData, trainingLabels=trainingLabels)
 
@@ -314,7 +333,7 @@ trainingLabels, validationLabels, testingLabels):
 		y = hyperparameter["stats"]
 		f.plot(x,y)
 		f.set_xticks(hyperparameter["x_content"])
-		f.set_yticks(list(range(0,100,50)))
+		f.set_yticks(list(range(0,151,50)))
 		for index in range(len(x)):
 			f.text(x[index], y[index], y[index], size=10)
 
@@ -327,50 +346,66 @@ trainingLabels, validationLabels, testingLabels):
 	print ("Best values for each hyperparameter: ")
 	print("gamma ", bestValues[0])
 	print("C ", bestValues[1])
+	print("kernel ", bestValues[2])
 
-	print("Testing...")
-	guesses = classifier.classify(testData=testingData)
-	calcAccuracy(guesses=guesses, correctLabels=testingLabels)
+
+	print("Testing with the tuned hyperparameters...")
+	bestClassifier = SVMClassifier(bestValues[0], bestValues[1], bestValues[2])
+	bestClassifier.train(trainingData, trainingLabels)
+	guesses = bestClassifier.classify(testData=testingData)
+	calcAccuracy(guesses=guesses, correctLabels=testingLabels)	
 
 
 def runMLP(trainingData, validationData, testingData, 
 trainingLabels, validationLabels, testingLabels):
 
 	figure = plt.figure(constrained_layout=True)
-	plots = figure.add_gridspec(2, 3)
+	plots = figure.add_gridspec(3, 1)
 
 	hyperparameters = [
 		{
 			"number" : 0,
+			"name": "nodes in hidden layers",
+			"dims": plots[0],
+			"x_label": "activation function",
+			"x_content" :["(300, 200, 100)", "(200,100,50)", "(100,50,25)", "(50,25,12)"],
+			"plot_title": "Accuracy change with different activation functions",
+			"values": [
+				[i,"relu", 0.001] for i in [(300, 200, 100), (200,100,50), (100,50,25), (50,25,12)]
+			],
+			"stats" : []
+		},		
+		{
+			"number" : 1,
 			"name": "activation function",
-			"dims": plots[0, :],
+			"dims": plots[1],
 			"x_label": "activation function",
 			"x_content" :['identity', 'logistic', 'tanh', 'relu'],
 			"plot_title": "Accuracy change with different activation functions",
 			"values": [
-				[i, 0.001] for i in ['identity', 'logistic', 'tanh', 'relu']
+				[(100,),i, 0.001] for i in ['identity', 'logistic', 'tanh', 'relu']
 			],
 			"stats" : []
 		},
 		{
-			"number" : 1,
+			"number" : 2,
 			"name": "learning rate init",
-			"dims": plots[1, :],
+			"dims": plots[2],
 			"x_label": "values for learning rate init",
 			"x_content" :[0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5],
 			"plot_title": "Accuracy change with different learning rate init",
 			"values": [
-				["relu", i] for i in [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5]
+				[(100,),"relu", i] for i in [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5]
 			],
 			"stats" : []
 		},				
 	]
-	bestValues = [0,0]
+	bestValues = [0,0,0]
 	for hyperparameter in hyperparameters:
 		print("Tuning the ",hyperparameter["name"], " hyperparameter")
 		maxAccuracy = 0
 		for value in hyperparameter["values"]:
-			classifier = MLP(value[0], value[1])
+			classifier = MLP(value[0], value[1], value[2])
 			print("Training...")
 			classifier.train(trainingData=trainingData, trainingLabels=trainingLabels)
 
@@ -388,8 +423,9 @@ trainingLabels, validationLabels, testingLabels):
 		x = hyperparameter["x_content"]
 		y = hyperparameter["stats"]
 		f.plot(x,y)
-		f.set_xticks(hyperparameter["x_content"])
-		f.set_yticks(list(range(0,100,50)))
+		if hyperparameter["number"] != 0:
+			f.set_xticks(hyperparameter["x_content"])
+		f.set_yticks(list(range(0,151,50)))
 		for index in range(len(x)):
 			f.text(x[index], y[index], y[index], size=10)
 
@@ -400,11 +436,15 @@ trainingLabels, validationLabels, testingLabels):
 
 	print ("---------------------------------------")
 	print ("Best values for each hyperparameter: ")
-	print("activation function: ", bestValues[0])
-	print("learning rate init ", bestValues[1])
+	
+	print("hidden layers: ", bestValues[0])
+	print("activation function: ", bestValues[1])
+	print("learning rate init ", bestValues[2])
 
-	print("Testing...")
-	guesses = classifier.classify(testData=testingData)
+	print("Testing with the tuned hyperparameters...")
+	bestClassifier = MLP(bestValues[0], bestValues[1], bestValues[2])
+	bestClassifier.train(trainingData, trainingLabels)
+	guesses = bestClassifier.classify(testData=testingData)
 	calcAccuracy(guesses=guesses, correctLabels=testingLabels)
 
 
