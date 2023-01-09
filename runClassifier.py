@@ -1,5 +1,6 @@
 from knn import KnnClassifier
 from bayes import BayesClassifier
+from decision_tree import DecisionTreeClassifier
 from perceptron import MLP
 from svm import SVMClassifier
 import samples
@@ -21,38 +22,6 @@ VALIDATION_DATA_SIZE_DIGITS = 1000
 TRAINING_DATA_SIZE_FACES = 451
 TESTING_DATA_SIZE_FACES = 150
 VALIDATION_DATA_SIZE_FACES = 301
-
-
-
-def digitFeatureExtractor(datum):
-    """
-    Returns a set of pixel features indicating whether
-    each pixel in the provided datum is white (0) or gray/black (1)
-    """
-
-    features = util.Counter()
-    for x in range(DIGIT_DATUM_WIDTH):
-        for y in range(DIGIT_DATUM_HEIGHT):
-            if datum.getPixel(x, y) > 0:
-                features[(x, y)] = 1
-            else:
-                features[(x, y)] = 0
-    return features
-
-
-def faceFeatureExtractor(datum):
-  """
-  Returns a set of pixel features indicating whether
-  each pixel in the provided datum is an edge (1) or no edge (0)
-  """
-  features = util.Counter()
-  for x in range(FACE_DATUM_WIDTH):
-    for y in range(FACE_DATUM_HEIGHT):
-      if datum.getPixel(x, y) > 0:
-        features[(x,y)] = 1
-      else:
-        features[(x,y)] = 0
-  return features
 
 def runClassifier():
 
@@ -123,6 +92,8 @@ def runClassifier():
     faceValidationLabels = np.array(faceValidationLabels)
     faceTestingLabels = np.array(faceTestingLabels)    
 
+    classifier = DecisionTreeClassifier("gini", 5)
+    classifier.train(trainingData=digitTrainingData, trainingLabels=digitTrainingLabels)
     #runMLP(trainingData=digitTrainingData, validationData=digitValidationData, testingData=digitTestingData,
     #trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
     #testingLabels=digitTestingLabels)
@@ -143,18 +114,10 @@ def runClassifier():
     # trainingLabels=digitTrainingLabels, validationLabels=digitValidationLabels,
     # testingLabels=digitTestingLabels)
 
-    #runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-    #trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
-    #testingLabels=faceTestingLabels)    
-
-    #runMLP(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
-    #trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
-    #testingLabels=faceTestingLabels)  
-
-    runSVM(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
+    runBayes(trainingData=faceTrainingData, validationData=faceValidationData, testingData=faceTestingData,
     trainingLabels=faceTrainingLabels, validationLabels=faceValidationLabels,
-    testingLabels=faceTestingLabels)  
-  
+    testingLabels=faceTestingLabels)    
+
 
 def runSVM(trainingData, validationData, testingData, 
 trainingLabels, validationLabels, testingLabels):
